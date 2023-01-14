@@ -11,33 +11,52 @@ class GenerateView:
             schema["table_catalog"], schema["table_schema"], schema["table_name"]
         )
 
-    def to_lookml(self, sql_reference=None, view_name=None, fields=None):
+    def fields_to_lookml(self, fields=None, nested=False):
+        if nested:
+            return fields
+        return parse_all_fields(fields)
+
+    def validate_view(self, view):
+        print(view)
+        for dim in view["dimensions"]:
+            if dim["dimension"].get("metadata"):
+                del dim["dimension"]["metadata"]
+            if dim["dimension"]["type"] is None:
+                del dim["dimension"]["type"]
+            if dim.get("fields") is not None:
+                del dim["dimension"]["fields"]
+
+        return view
+
+    def to_lookml(self, fields=None, view_name=None, nested: bool = False):
 
         views = []
 
         create_view = {
-            "sql_table_name": sql_reference or self.sql_reference,
             "view_name": view_name or self.view_name,
         }
+        if nested is False:
+            create_view["sql_table_name"] = self.sql_reference
 
         fields = fields or self.fields
+        dimensions = self.fields_to_lookml(fields, nested)
 
-        dimensions = parse_all_fields(fields)
-
-        if len(dimensions) == 0 or dimensions is None:
-            raise AssertionError("No fields parsed")
-        else:
-            create_view["dimensions"] = dimensions
+        create_view["dimensions"] = dimensions
 
         for dim in dimensions:
-            if dim.get("fields") is not None and dim["metadata"]["repeat_type"] == "complex":
-                dim_fields = dim["fields"]
-                result = self.generate_nested_views(dim_fields)
-                views.append(result)
+            d = dim["dimension"]
+            if d.get("fields") is not None and d["metadata"].get("repeat_type") == "complex":
+                data_fields = d["fields"]
+
+                nested_view_name = self.view_name.lower() + "__" + d["name"]
+
+                # result = self.generate_nested_views(data_fields, nested_view_name)
+
+                # views.append(result)
 
         views.append(create_view)
 
-        output = {"views": views}
+        output = {"views": [self.validate_view(view) for view in views]}
 
         parsed_lookml = lkml.dump(output)
 
@@ -45,5 +64,6 @@ class GenerateView:
 
         return parsed_lookml
 
-    def generate_nested_views(self, fields):
-        return self.to_lookml(fields, "test", "test")
+    def generate_nested_views(self, fields, view_name):
+        result = self.to_lookml(fields, view_name, nested=True)
+        return result
