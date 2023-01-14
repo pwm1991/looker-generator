@@ -23,11 +23,15 @@ def clean_view_name(string):
 
 
 def build_sql_reference(table_reference: dict):
-    return [
-        table_reference["project"],
-        table_reference["dataset"],
-        table_reference["name"],
-    ].join(".")
+    # join list of strings with "."
+
+    return (".").join(
+        [
+            table_reference["projectId"],
+            table_reference["datasetId"],
+            table_reference["tableId"],
+        ]
+    )
 
 
 def create_view_name(string) -> str:
@@ -36,5 +40,9 @@ def create_view_name(string) -> str:
     return output
 
 
-def pretty_print(obj):
-    print(json.dumps(obj, indent=4))
+def pretty_print(input):
+    # if input is a string
+    if isinstance(input, str):
+        print(input)
+    elif isinstance(input, dict):
+        print(json.dumps(input, indent=4))

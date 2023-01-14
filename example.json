@@ -1,7 +1,9 @@
 {
-    "table_catalog": "looker",
-    "table_schema": "sp",
-    "table_name": "example",
+    "tableReference": {
+        "projectId": "looker",
+        "datasetId": "sp",
+        "tableId": "example"
+    },
     "fields": [
         {
             "column_name": "id",

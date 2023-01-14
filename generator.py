@@ -5,8 +5,9 @@ from parse_columns import parse_all_fields
 
 class GenerateView:
     def __init__(self, schema):
-        self.reference = schema["table_name"]
-        self.view_name = create_view_name(schema["table_name"])
+        self.table_name = schema["tableReference"]["tableId"]
+        self.reference = self.table_name
+        self.view_name = create_view_name(self.table_name)
         self.fields = schema["fields"]
         self.sql_reference = build_sql_reference(schema["tableReference"])
 
@@ -18,7 +19,7 @@ class GenerateView:
         views = []
 
         create_view = {
-            "reference": self.reference,
+            "name": self.reference,
             "view_name": self.view_name,
             "sql_table_name": self.sql_reference,
         }
@@ -39,4 +40,13 @@ class GenerateView:
 
         views = views[::-1]
 
-        pretty_print(views)
+        parsed = {"views": views}
+
+        # parse to lookml
+        parsed = lkml.dump(parsed)
+
+        # save parsed output to file
+        with open(f"{self.view_name}.view.lkml", "w") as f:
+            f.write(parsed)
+
+        pretty_print(parsed)
