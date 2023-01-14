@@ -11,7 +11,7 @@
         },
         {
             "column_name": "start_tstamp",
-            "data_type": "TIMESTAMP"
+            "data_type": "timestamp"
         },
         {
             "column_name": "addresses",

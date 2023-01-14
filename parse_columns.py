@@ -1,37 +1,15 @@
-from text import pretty_label
-
-parsed = []
-
-
-def bigquery_type_to_looker(bigquery_type):
-
-    bigquery_type = bigquery_type.upper()
-
-    types = {
-        "STRING": "string",
-        "BOOLEAN": "yesno",
-        "NUMERIC": "number",
-        "FLOAT": "number",
-        "INTEGER": "number",
-        "DATE": "time",
-        "TIME": "time",
-        "TIMESTAMP": "time",
-        "DATETIME": "time",
-        "RECORD": None,
-    }
-    # when type not in types, raise exception
-    if bigquery_type not in types:
-        raise raise_type_not_found(bigquery_type)
-    return types[bigquery_type]
+import text
+from bigquery_utils import bigquery_type_to_looker
 
 
-remove_timezones = ["DATE", "TIMESTAMP", "DATETIME"]
+def set_looker_timeframes(type, data_type) -> dict:
 
-looker_timeframes = ["raw", "time", "date", "week", "month", "quarter", "year"]
-
-
-def raise_type_not_found(type):
-    return TypeError(f"Type {type} not in types")
+    looker_timeframes = ["raw", "time", "date", "week", "month", "quarter", "year"]
+    response = {"convert_tz": "no", "timeframes": looker_timeframes}
+    if type == "time":
+        return response
+    elif data_type in ["DATE", "TIMESTAMP", "DATETIME"]:
+        return dict(response, *{"timeframes": looker_timeframes.remove("time")})
 
 
 def is_primary_key(name):
@@ -45,20 +23,15 @@ def parse_field(dim, nested_mode=False):
         "sql": dim["column_name"],
         "type": bigquery_type_to_looker(dim["data_type"]),
         "name": dim["column_name"].lower(),
-        "label": pretty_label(dim["column_name"]),
+        "label": text.pretty_label(dim["column_name"]),
     }
 
     if nested_mode == False:
         definition["sql"] = f"${{TABLE}}.{definition['sql']}"
 
-    """Set timeframes if a time type"""
-    if definition["type"] == "time":
-        definition["timeframes"] = looker_timeframes
-
-    """Remove timezones and time type if just a date"""
-    if dim["data_type"] in remove_timezones:
-        definition["convert_tz"] = "no"
-        definition["timeframes"].remove("time")
+    if definition["type"] in ["time", "date"]:
+        timeframes = set_looker_timeframes(definition["type"], dim["data_type"])
+        definition = dict(definition, **timeframes)
 
     """Set description"""
     if dim.get("description") is not None:
@@ -77,10 +50,15 @@ def parse_field(dim, nested_mode=False):
         definition["hidden"] = "yes"
 
         if dim.get("fields") is not None:
-            definition["nested_view"] = {
-                "view_name": dim["column_name"],
-                "dimensions": parse_all_fields(dim["fields"], True),
-            }
+            dimensions = parse_all_fields(dim["fields"], True)
+            group_label = text.pretty_label(dim["column_name"])
+
+            # add group_label key to each dimension in dimensions
+            dimensions = [
+                dict(dimension, **{"group_label": group_label}) for dimension in dimensions
+            ]
+
+            definition["nested_view"] = {"view_name": dim["column_name"], "dimensions": dimensions}
 
     return definition
 

@@ -1,33 +1,38 @@
 import json
 
 
-def pretty_labels(name):
-    clean_name = name.replace("_", " ").replace("-", " ").title()
+def pretty_label(name):
+    input_name = name.lower()
+    output = input_name.replace("_", " ").replace("-", " ").title()
 
     # if clean name exactly equals "id" or "pk" then uppercase
-    if clean_name in ["Id", "Pk"]:
-        clean_name = clean_name.upper()
+    if input_name.lower() in ["id", "pk", "fk", "sk"]:
+        output = output.upper()
     # if clean name ends with " id" or "pk" then uppercase "id" or "pk"
-    if clean_name.endswith(" id") or clean_name.endswith("pk"):
-        clean_name = clean_name[:-2] + clean_name[-2:].upper()
+    if input_name.endswith(" Id") or input_name.endswith("Pk"):
+        output = output[:-2] + output[-2:].upper()
 
-    if clean_name.endswith("_tstamp"):
-        clean_name = clean_name.split("_tstamp")[0]
+    if output.endswith(" Tstamp"):
+        output = output.split(" Tstamp")[0]
 
-    return clean_name
+    return output
 
 
 def clean_view_name(string):
     return string.replace("_av", "").replace("av_", "")
 
 
-def build_sql_reference(project, dataset, name):
-    return f"{project}.{dataset}.{name}"
+def build_sql_reference(table_reference: dict):
+    return [
+        table_reference["project"],
+        table_reference["dataset"],
+        table_reference["name"],
+    ].join(".")
 
 
 def create_view_name(string) -> str:
     output = clean_view_name(string)
-    output = pretty_labels(output)
+    output = pretty_label(output)
     return output
 
 

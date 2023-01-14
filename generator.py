@@ -8,9 +8,7 @@ class GenerateView:
         self.reference = schema["table_name"]
         self.view_name = create_view_name(schema["table_name"])
         self.fields = schema["fields"]
-        self.sql_reference = build_sql_reference(
-            schema["table_catalog"], schema["table_schema"], schema["table_name"]
-        )
+        self.sql_reference = build_sql_reference(schema["tableReference"])
 
     def fields_to_lookml(self, fields=None):
         return parse_all_fields(fields)
