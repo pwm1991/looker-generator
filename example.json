@@ -1,0 +1,42 @@
+{
+    "table_catalog": "looker",
+    "table_schema": "sp",
+    "table_name": "example",
+    "fields": [
+        {
+            "column_name": "id",
+            "data_type": "NUMERIC",
+            "is_nullable": "NULLABLE",
+            "column_default": 1
+        },
+        {
+            "description": "I am a simple table.",
+            "column_name": "first_column",
+            "data_type": "STRING",
+            "is_nullable": "NULLABLE"
+        },
+        {
+            "is_nullable": "REPEATED",
+            "column_name": "column3",
+            "data_type": "STRING"
+        },
+        {
+            "column_name": "dob",
+            "data_type": "DATE",
+            "is_nullable": "NULLABLE"
+        },
+        {
+            "column_name": "addresses",
+            "data_type": "RECORD",
+            "is_nullable": "REPEATED",
+            "fields": [
+                {
+                    "description": "Some sort of status field here.",
+                    "column_name": "status",
+                    "data_type": "STRING",
+                    "is_nullable": "NULLABLE"
+                }
+            ]
+        }
+    ]
+}
