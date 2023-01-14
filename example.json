@@ -8,6 +8,23 @@
             "data_type": "NUMERIC",
             "is_nullable": "NULLABLE",
             "column_default": 1
+        },
+        {
+            "column_name": "start_tstamp",
+            "data_type": "TIMESTAMP"
+        },
+        {
+            "column_name": "addresses",
+            "data_type": "RECORD",
+            "is_nullable": "REPEATED",
+            "fields": [
+                {
+                    "description": "Some sort of status field here.",
+                    "column_name": "status",
+                    "data_type": "STRING",
+                    "is_nullable": "NULLABLE"
+                }
+            ]
         }
     ]
 }

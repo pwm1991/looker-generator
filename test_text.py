@@ -1,0 +1,34 @@
+import text
+
+# create unittest for pretty_labels
+def test_pretty_labels():
+    assert text.pretty_labels("test-test_test") == "Test Test Test"
+    assert text.pretty_labels("test_id") == "Test ID"
+    assert text.pretty_labels("test_pk") == "Test PK"
+    assert text.pretty_labels("test_tstamp") == "Test"
+
+
+# create unittest for clean_view_name
+def test_clean_view_name():
+    assert text.clean_view_name("av_test") == "test"
+    assert text.clean_view_name("test_av") == "test"
+    assert text.clean_view_name("test_av_test") == "test_test"
+
+
+# create unittest for build_sql_reference
+def test_build_sql_reference():
+    assert text.build_sql_reference("project", "dataset", "name") == "project.dataset.name"
+
+
+# create unittest for create_view_name
+def test_create_view_name():
+    assert text.create_view_name("av_test") == "Test"
+    assert text.create_view_name("test_av") == "Test"
+    assert text.create_view_name("test_av_test") == "Test Test"
+    assert text.create_view_name("test_av_test_av") == "Test Test"
+    assert text.create_view_name("test_av_test_av_test") == "Test Test Test"
+
+
+# create unittest for pretty_print
+def test_pretty_print():
+    assert text.pretty_print({"test": "test"}) == '{"test": "test"}'
