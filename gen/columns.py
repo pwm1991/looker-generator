@@ -1,5 +1,5 @@
-import text
-from bigquery_utils import bigquery_type_to_looker
+from gen.text import pretty_label
+from gen.looker_utils import bigquery_type_to_looker
 
 
 def set_looker_timeframes(type, data_type) -> dict:
@@ -23,7 +23,7 @@ def parse_field(dim, nested_mode=False):
         "sql": dim["column_name"],
         "type": bigquery_type_to_looker(dim["data_type"]),
         "name": dim["column_name"].lower(),
-        "label": text.pretty_label(dim["column_name"]),
+        "label": pretty_label(dim["column_name"]),
     }
 
     if nested_mode == False:
@@ -51,7 +51,7 @@ def parse_field(dim, nested_mode=False):
 
         if dim.get("fields") is not None:
             dimensions = parse_all_fields(dim["fields"], True)
-            group_label = text.pretty_label(dim["column_name"])
+            group_label = pretty_label(dim["column_name"])
 
             # add group_label key to each dimension in dimensions
             dimensions = [

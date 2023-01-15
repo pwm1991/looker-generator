@@ -1,5 +1,5 @@
 import json
-from generator import GenerateView
+from gen.create_view import GenerateView
 
 # Function that loads schema from a json file
 def load_schema(file):
@@ -8,10 +8,7 @@ def load_schema(file):
 
 
 def main():
-    schema = load_schema("example.json")
+    schema = load_schema("views/example.json")
 
     new_schema = GenerateView(schema)
     new_schema.to_lookml()
-
-
-main()
