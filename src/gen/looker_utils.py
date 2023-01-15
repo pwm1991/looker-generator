@@ -1,6 +1,8 @@
 import datetime
 from textwrap import dedent
 
+looker_timeframes = ["raw", "time", "date", "week", "month", "quarter", "year"]
+
 
 def looker_warning(objects_in_file):
 
@@ -26,7 +28,11 @@ def looker_warning(objects_in_file):
     )
 
 
-looker_timeframes = ["raw", "time", "date", "week", "month", "quarter", "year"]
+def bool_to_string(bool):
+    if bool:
+        return "yes"
+    else:
+        return "no"
 
 
 def bigquery_type_to_looker(bigquery_type):
