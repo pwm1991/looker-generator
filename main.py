@@ -1,7 +1,7 @@
 import os
 import json
 import logging
-from gen.create_view import GenerateView
+from src.gen.create_view import GenerateView
 
 # Function that loads schema from a json file
 def load_schema(file):
@@ -28,10 +28,9 @@ def get_files():
 def main():
     files = get_files()
     for file in files:
-        if file == "example-with-2-repeated-records.json":
-            schema = load_schema(f"views/{file}")
-            new_schema = GenerateView(schema)
-            new_schema.to_lookml()
+        schema = load_schema(f"views/{file}")
+        new_schema = GenerateView(schema)
+        new_schema.to_lookml()
 
 
 main()
