@@ -18,8 +18,14 @@ def test_clean_view_name():
 # create unittest for build_sql_reference
 def test_build_sql_reference():
     assert (
-        text.build_sql_reference({"project": "test", "dataset": "test", "name": "test"})
-        == "test.test.test"
+        text.build_sql_reference(
+            {
+                "projectId": "testProject",
+                "datasetId": "testDataset",
+                "tableId": "testTable",
+            }
+        )
+        == "testProject.testDataset.testTable"
     )
 
 
@@ -30,8 +36,3 @@ def test_create_view_name():
     assert text.create_view_name("test_av_test") == "Test Test"
     assert text.create_view_name("test_av_test_av") == "Test Test"
     assert text.create_view_name("test_av_test_av_test") == "Test Test Test"
-
-
-# create unittest for pretty_print
-def test_pretty_print():
-    assert text.pretty_print({"test": "test"}) == '{"test": "test"}'

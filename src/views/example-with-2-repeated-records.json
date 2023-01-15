@@ -2,7 +2,7 @@
     "tableReference": {
         "projectId": "looker",
         "datasetId": "sp",
-        "tableId": "example"
+        "tableId": "example-with-multiple-repeats"
     },
     "fields": [
         {
@@ -25,6 +25,23 @@
                     "column_name": "status",
                     "data_type": "STRING",
                     "is_nullable": "NULLABLE"
+                },
+                {
+                    "column_name": "start_tstamp",
+                    "data_type": "timestamp"
+                },
+                {
+                    "column_name": "postcodes",
+                    "data_type": "RECORD",
+                    "is_nullable": "REPEATED",
+                    "fields": [
+                        {
+                            "description": "Postcode",
+                            "column_name": "zipcode",
+                            "data_type": "STRING",
+                            "is_nullable": "NULLABLE"
+                        }
+                    ]
                 }
             ]
         }

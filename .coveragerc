@@ -1,0 +1,10 @@
+[run]
+branch = True
+data_file = ./.coverage/.coverage
+
+[html]
+directory = ./.coverage/html_report/
+
+[pytest]
+# a directory
+testpaths = tests

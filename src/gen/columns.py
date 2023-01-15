@@ -1,10 +1,9 @@
-from gen.text import pretty_label
-from gen.looker_utils import bigquery_type_to_looker
+from gen.tests.text import pretty_label
+from gen.looker_utils import bigquery_type_to_looker, looker_timeframes
 
 
-def set_looker_timeframes(type, data_type) -> dict:
+def set_looker_timeframes(type, data_type):
 
-    looker_timeframes = ["raw", "time", "date", "week", "month", "quarter", "year"]
     response = {"convert_tz": "no", "timeframes": looker_timeframes}
     if type == "time":
         return response
@@ -55,10 +54,14 @@ def parse_field(dim, nested_mode=False):
 
             # add group_label key to each dimension in dimensions
             dimensions = [
-                dict(dimension, **{"group_label": group_label}) for dimension in dimensions
+                dict(dimension, **{"group_label": group_label})
+                for dimension in dimensions
             ]
 
-            definition["nested_view"] = {"view_name": dim["column_name"], "dimensions": dimensions}
+            definition["nested_view"] = {
+                "view_name": dim["column_name"],
+                "dimensions": dimensions,
+            }
 
     return definition
 
