@@ -6,11 +6,15 @@ from src.gen.looker_utils import (
 )
 
 
-def set_looker_timeframes(type, data_type):
-    if type == "time":
+def clean_looker_properties_timeframes(type, data_type):
+    if data_type in ["DATE"]:
+        # remove time from timeframes
+        times = looker_timeframes
+        times.remove("time")
+        times.remove("raw")
+        return times
+    elif type == "time":
         return looker_timeframes
-    elif data_type in ["DATE", "TIMESTAMP", "DATETIME"]:
-        return looker_timeframes.remove("time")
 
 
 class Dimension:
@@ -38,7 +42,7 @@ class Dimension:
 
     def _set_time(self):
         self.timeframes = (
-            set_looker_timeframes(self.type, self.dim["data_type"]) or None
+            clean_looker_properties_timeframes(self.type, self.dim["data_type"]) or None
         )
         if self.timeframes is not None:
             self.convert_tz = "no"
@@ -65,7 +69,7 @@ class Dimension:
         self.handle_repeated_fields()
         return self.__dict__
 
-    def set_looker(self):
+    def clean_looker_properties(self):
         o = self.as_dict()
 
         invalid_keys = [

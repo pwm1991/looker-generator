@@ -27,8 +27,8 @@
                     "is_nullable": "NULLABLE"
                 },
                 {
-                    "column_name": "start_tstamp",
-                    "data_type": "timestamp"
+                    "column_name": "move_in_date",
+                    "data_type": "DATE"
                 }
             ]
         }

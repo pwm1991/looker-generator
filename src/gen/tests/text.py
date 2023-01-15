@@ -14,11 +14,18 @@ def pretty_label(name):
     if output.endswith(" Tstamp"):
         output = output.split(" Tstamp")[0]
 
+    # remove 2 or more spaces in string
+    output = " ".join(output.split())
+
     return output
 
 
 def clean_view_name(string):
-    return string.replace("_av", "").replace("av_", "")
+    for l in ["_av", "av_"]:
+        string = string.replace(l, "")
+    for l in ["  "]:
+        string = string.replace(l, " ")
+    return string
 
 
 def build_sql_reference(table_reference: dict):
@@ -39,10 +46,18 @@ def create_view_name(string) -> str:
     return output
 
 
+def looker_reference(string) -> str:
+    # replace -,_," " with _
+    # lowercase
+    for l in ["-", " "]:
+        string = string.replace(l, "_")
+    return string.lower()
+
+
 def safe_filename(filen) -> str:
-    if filen.endswith(".lkml") is False:
-        filen = filen + ".lkml"
-    return filen.replace(" ", "_").lower()
+    if filen.endswith(".view.lkml") is False:
+        filen = filen + ".view.lkml"
+    return filen.replace(" ", "_").replace("-", "_").lower()
 
 
 def pretty_print(input):

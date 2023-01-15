@@ -1,8 +1,8 @@
 {
     "tableReference": {
-        "projectId": "looker",
-        "datasetId": "sp",
-        "tableId": "flat-example"
+        "projectId": "ct-looker-production",
+        "datasetId": "dataset_name",
+        "tableId": "flat_tablename"
     },
     "description": "The complete works of William Shakespeare, conveniently broken into 37,000+ lines of text.",
     "fields": [
