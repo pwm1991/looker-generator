@@ -1,4 +1,4 @@
-from src.gen.tests.text import pretty_label
+from src.gen.text import pretty_label
 from src.gen.looker_utils import (
     bigquery_type_to_looker,
     looker_timeframes,
@@ -22,12 +22,14 @@ class Dimension:
         self.dim = dim
         self.nested_mode = nested_mode
         self.sql = self._set_sql_name()
+        self.field_type = "dimension"
         self.name = dim["column_name"].lower()
         self.type = bigquery_type_to_looker(dim["data_type"])
         self.description = dim.get("description") or None
         self.label = pretty_label(dim["column_name"])
-        self.column_default = dim.get("COLUMN_DEFAULT") or None
-        self.primary_key = self._is_primary_key()
+        self.group_label = self._set_group_label()
+        self.column_default = self._set_column_default()
+        self.primary_key = self._guess_primary_key()
 
     def _set_sql_name(self):
         if self.nested_mode == False:
@@ -35,7 +37,24 @@ class Dimension:
         else:
             return self.dim["column_name"]
 
-    def _is_primary_key(self):
+    def _set_group_label(self):
+        diagnostic_fields = ["event_id", "run_id"]
+        snowplow_identifiers = [
+            "session_id",
+            "network_userid",
+            "domain_sessionid",
+            "user_id",
+        ]
+        if self.name in diagnostic_fields:
+            return "Diagnostic Fields"
+        elif self.name in snowplow_identifiers:
+            return "Snowplow Identifiers"
+
+    def _set_column_default(self):
+        if self.dim.get("COLUMN_DEFAULT") is not None:
+            return self.dim["COLUMN_DEFAULT"]
+
+    def _guess_primary_key(self):
         # check if name is in a list of primary keys
         if self.name in ["id", "primary_key", "pk"]:
             return bool_to_string(True)
@@ -45,6 +64,8 @@ class Dimension:
             clean_looker_properties_timeframes(self.type, self.dim["data_type"]) or None
         )
         if self.timeframes is not None:
+            self.field_type = "dimension_group"
+            # Never convert the timezone for timeframes
             self.convert_tz = "no"
 
     def handle_repeated_fields(self):
@@ -88,12 +109,12 @@ class Dimension:
 
 
 def parse_all_fields(fields, nested_mode=False):
-    dimensions = []
+    parsed_fields = []
     for field in fields:
         response = Dimension(field, nested_mode)
-        dimensions.append(response)
+        parsed_fields.append(response)
 
-    if len(dimensions) == 0:
+    if len(parsed_fields) == 0:
         raise AssertionError("No fields parsed?")
 
-    return dimensions
+    return parsed_fields

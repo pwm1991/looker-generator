@@ -1,7 +1,7 @@
 from os import mkdir
 import lkml
 from src.gen.looker_utils import looker_warning
-from gen.text import (
+from src.gen.text import (
     create_view_name,
     build_sql_reference,
     safe_filename,
@@ -56,8 +56,22 @@ class View:
     def get_dimensions(self):
         return self.parsed_fields
 
+    def _translate_fields_to_types(self):
+        supported_types = ["dimension", "dimension_group", "measure"]
+        results = {}
+        for type in supported_types:
+            results[type] = []
+            for field in self.parsed_fields:
+                if field.get("field_type") == type:
+                    results[type].append(field)
+            if len(results[type]) == 0:
+                del results[type]
+
+        return results
+
     def to_dict(self):
         view = dict()
+        fields = self._translate_fields_to_types()
         if self.nested is False:
             view.update(
                 {
@@ -73,16 +87,10 @@ class View:
                     "name": looker_reference(
                         f"{self.parent}__{self.schema['view_name']}"
                     ),
+                    "view_name": self.view_name,
                 }
             )
-
-        # merge two objects
-        view.update(
-            {
-                "view_name": self.view_name,
-                "dimensions": self.parsed_fields,
-            }
-        )
+        view.update(fields)
         return view
 
 
@@ -125,17 +133,18 @@ class GenerateView:
 
         views.append(view.to_dict())
 
-        # for dim in view["dimensions"]:
-        #     if dim.get("nested_view") is not None:
-        #         view = self.handle_nested_views(dim)
+        for dim in view.parsed_fields:
+            if dim.get("nested_view") is not None:
+                parent_view_name = "tbc"
+                view = self.handle_nested_views(dim, parent_view_name)
 
-        #         del dim["nested_view"]
-        #         del dim["dimensions"]
+                del dim["nested_view"]
+                del dim["dimensions"]
 
-        #         if view is not None:
-        #             # merge arrays
+                if view is not None:
+                    # merge arrays
 
-        #             views = views + view
+                    views = views + view
 
         return views
 
