@@ -1,3 +1,4 @@
+from os import mkdir
 import lkml
 from src.gen.looker_utils import looker_warning
 from src.gen.tests.text import (
@@ -100,6 +101,13 @@ class GenerateView:
 
     def save_file(self, data):
         path_to_write = f".coverage/{self.file_name}"
+
+        # create directory ./coverage if it doesn't exist
+        try:
+            mkdir(".coverage")
+        except FileExistsError:
+            pass
+
         with open(path_to_write, "w") as f:
 
             f.write(data)
