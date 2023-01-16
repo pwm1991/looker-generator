@@ -28,10 +28,9 @@ def get_files():
 def main():
     files = get_files()
     for file in files:
-        if file.startswith("example-with-re"):
-            schema = load_schema(f"views/{file}")
-            new_schema = GenerateView(schema)
-            new_schema.to_lookml()
+        schema = load_schema(f"views/{file}")
+        new_schema = GenerateView(schema)
+        new_schema.to_lookml()
 
 
 main()
