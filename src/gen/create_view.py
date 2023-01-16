@@ -1,7 +1,7 @@
 from os import mkdir
 import lkml
 from src.gen.looker_utils import looker_warning
-from src.gen.tests.text import (
+from gen.text import (
     create_view_name,
     build_sql_reference,
     safe_filename,
