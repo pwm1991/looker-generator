@@ -5,26 +5,28 @@
         "tableId": "flat_tablename"
     },
     "description": "The complete works of William Shakespeare, conveniently broken into 37,000+ lines of text.",
-    "fields": [
-        {
-            "column_name": "id",
-            "data_type": "NUMERIC",
-            "is_nullable": "NULLABLE",
-            "column_default": 1
-        },
-        {
-            "column_name": "start_tstamp",
-            "data_type": "TIMESTAMP",
-            "description": "The start time of the event"
-        },
-        {
-            "column_name": "time_of_birth",
-            "data_type": "TIME"
-        },
-        {
-            "column_name": "is_called_steven",
-            "data_type": "BOOLEAN",
-            "column_default": true
-        }
-    ]
+    "schema": {
+        "fields": [
+            {
+                "column_name": "id",
+                "data_type": "NUMERIC",
+                "is_nullable": "NULLABLE",
+                "column_default": 1
+            },
+            {
+                "column_name": "start_tstamp",
+                "data_type": "TIMESTAMP",
+                "description": "The start time of the event"
+            },
+            {
+                "column_name": "time_of_birth",
+                "data_type": "TIME"
+            },
+            {
+                "column_name": "is_called_steven",
+                "data_type": "BOOLEAN",
+                "column_default": true
+            }
+        ]
+    }
 }

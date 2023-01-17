@@ -26,7 +26,7 @@ class View:
             self.sql_reference = build_sql_reference(self.schema["tableReference"])
             self.filename = safe_filename(self.table_id)
             self.view_name = create_view_name(self.table_id)
-            self.fields = self.schema.get("fields")
+            self.fields = self.schema.get("schema").get("fields")
         else:
             self.view_name = create_view_name(
                 f"{self.parent}__{self.schema['view_name']}"
@@ -98,7 +98,7 @@ class GenerateView:
     def __init__(self, schema):
         self.schema = schema
         self.file_name = safe_filename(schema["tableReference"]["tableId"])
-        self.fields = schema["fields"]
+        self.fields = schema["schema"]["fields"]
 
     def prepare_looker_for_write(self, lookml_input):
         total_views = len(lookml_input["views"])

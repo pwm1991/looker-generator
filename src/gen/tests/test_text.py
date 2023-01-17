@@ -1,4 +1,4 @@
-import text
+import src.gen.text as text
 
 # create unittest for pretty_label
 def test_pretty_label():
