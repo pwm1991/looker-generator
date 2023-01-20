@@ -37,3 +37,8 @@ Tests are written using pytest. To run the tests, run the following command:
 ```coverage run -m pytest```
 
 Get coverage: ```coverage report```
+
+## To do
+
+1. Nested repeated fields create a view for each repeated field, when it should consolidate
+2. Nested views don't have their own name/parameters
