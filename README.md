@@ -42,3 +42,4 @@ Get coverage: ```coverage report```
 
 1. Nested repeated fields create a view for each repeated field, when it should consolidate
 2. Nested views don't have their own name/parameters
+3. 
