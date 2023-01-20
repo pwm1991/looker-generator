@@ -1,63 +1,72 @@
 import json
 
 
-def pretty_label(name):
-    output = name.replace("_", " ").replace("-", " ").title()
+def convert_to_string_case(string):
+    return string.replace("_", " ").replace("-", " ")
 
-    # if clean name exactly equals "id" or "pk" then uppercase
-    if output.lower() in ["id", "pk", "fk", "sk"]:
-        output = output.upper()
-    # if clean name ends with " id" or "pk" then uppercase "id" or "pk"
-    if output.endswith(" Id") or output.endswith("Pk"):
-        output = output[:-2] + output[-2:].upper()
 
-    if output.endswith(" Tstamp"):
-        output = output.split(" Tstamp")[0]
+def convert_to_snake_case(string: str) -> str:
+    return string.replace(" ", "_").replace("-", "_").lower()
 
-    # remove 2 or more spaces in string
-    output = " ".join(output.split())
+
+def title_pk(string):
+    if string.lower() in ["pk", "id", "fk", "sk"]:
+        return string.upper()
+    return string
+
+
+# return quoted string
+def quote_string(string):
+    return f'"{string}"'
+
+
+def remove_tstamp(string):
+    return string.split(" tstamp")[0]
+
+
+def remove_multiple_spaces(string):
+    return " ".join(string.split())
+
+
+def gen_field_label(name):
+    pk = ["pk", "id", "fk", "sk"]
+    output = convert_to_string_case(name)
+
+    output = title_pk(output)
+    if name.lower() in pk:
+        return output
+
+    # if name starts or ends with "date" remove date
+    if output.lower().startswith("date"):
+        output = output[4:]
+    if output.lower().endswith("date"):
+        output = output[:-4]
+    # if name starts or ends with "time" remove time
+    if output.lower().startswith("time"):
+        output = output[4:]
+
+    output = convert_to_string_case(output)
+    output = remove_tstamp(output)
+    output = remove_multiple_spaces(output)
+    output = output.replace(".", " ")
+    output = output.title()
+    output = output.strip()
+
+    # check string ends with an identifier, and upper case it
+    for a in pk:
+
+        if output.lower().endswith(a):
+            output = output[:-2] + a.upper()
 
     return output
 
 
-def clean_view_name(string):
+def gen_view_name(string):
     for l in ["_av", "av_"]:
         string = string.replace(l, "")
     for l in ["  "]:
         string = string.replace(l, " ")
     return string
-
-
-def build_sql_reference(table_reference: dict):
-    # join list of strings with "."
-
-    return (".").join(
-        [
-            table_reference["projectId"],
-            table_reference["datasetId"],
-            table_reference["tableId"],
-        ]
-    )
-
-
-def create_view_name(string) -> str:
-    output = clean_view_name(string)
-    output = pretty_label(output)
-    return output
-
-
-def looker_reference(string) -> str:
-    # replace -,_," " with _
-    # lowercase
-    for l in ["-", " "]:
-        string = string.replace(l, "_")
-    return string.lower()
-
-
-def safe_filename(filen) -> str:
-    if filen.endswith(".view.lkml") is False:
-        filen = filen + ".view.lkml"
-    return filen.replace(" ", "_").replace("-", "_").lower()
 
 
 def pretty_print(input):

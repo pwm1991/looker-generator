@@ -28,6 +28,7 @@ It does a few things with a view:
 4. Tries to identify Primary Keys if the column is called ID, PK or primary)key
 5. Light-touch labelling of potentially diagnostic or Snowplow-identifiable fields
 6. Remove `time` from date-based dimension groups
+7. it 
 
 ## Testing
 

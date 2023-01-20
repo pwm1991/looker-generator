@@ -1,41 +1,42 @@
-from src.gen.text import pretty_label
-from src.gen.looker_utils import (
+from src.gen.text import gen_field_label
+from src.gen.looker import (
     bigquery_type_to_looker,
     looker_timeframes,
     bool_to_string,
 )
 
 
-def clean_looker_properties_timeframes(type, data_type):
+def clean_looker_properties_timeframes(looker_type, data_type):
     if data_type in ["DATE"]:
         # remove time from timeframes
         times = looker_timeframes
         times.remove("time")
         times.remove("raw")
         return times
-    elif type == "time":
+    elif looker_type == "time":
         return looker_timeframes
 
 
 class Dimension:
-    def __init__(self, dim, nested_mode=False):
+    def __init__(self, dim, primary_key, nested_mode=False):
         self.dim = dim
+        self.primary_key = primary_key or None
         self.nested_mode = nested_mode
         self.sql = self._set_sql_name()
         self.field_type = "dimension"
-        self.name = dim["column_name"].lower()
-        self.type = bigquery_type_to_looker(dim["data_type"])
+        self.name = dim["name"].lower()
+        self.type = bigquery_type_to_looker(dim["type"])
         self.description = dim.get("description") or None
-        self.label = pretty_label(dim["column_name"])
+        self.label = gen_field_label(dim["name"])
         self.group_label = self._set_group_label()
         self.column_default = self._set_column_default()
         self.primary_key = self._guess_primary_key()
 
     def _set_sql_name(self):
         if self.nested_mode == False:
-            return f"${{TABLE}}.{self.dim['column_name']}"
+            return f"${{TABLE}}.{self.dim['name']}"
         else:
-            return self.dim["column_name"]
+            return self.dim["name"]
 
     def _set_group_label(self):
         diagnostic_fields = ["event_id", "run_id"]
@@ -56,12 +57,14 @@ class Dimension:
 
     def _guess_primary_key(self):
         # check if name is in a list of primary keys
-        if self.name in ["id", "primary_key", "pk"]:
+        if self.primary_key == self.name:
+            return bool_to_string(True)
+        if self.name.lower() in ["id", "primary_key", "pk"]:
             return bool_to_string(True)
 
     def _set_time(self):
         self.timeframes = (
-            clean_looker_properties_timeframes(self.type, self.dim["data_type"]) or None
+            clean_looker_properties_timeframes(self.type, self.dim["type"]) or None
         )
         if self.timeframes is not None:
             self.field_type = "dimension_group"
@@ -69,16 +72,33 @@ class Dimension:
             self.convert_tz = "no"
 
     def handle_repeated_fields(self):
-        if self.dim["data_type"] not in ["RECORD", "REPEATED"]:
+        if self.dim["type"] not in ["RECORD"]:
             return
-        self.hidden = "yes"
-        del self.type
 
-        if self.dim.get("fields") is not None:
-            self.dimensions = parse_all_fields(self.dim["fields"], True)
+        repeated_field_nested_mode = False
+        if self.dim.get("mode") in ["REPEATED"]:
+            self.hidden = "yes"
+            repeated_field_nested_mode = True
+            del self.type
+
+        if self.dim.get("name") == "subscription":
+            print("Subscription time!")
+
+        fields = self.dim.get("fields")
+        if fields is not None:
+            if repeated_field_nested_mode == False:
+                # For nested, non-repeating fields, prepend the parent dim.name
+                for field in fields:
+                    field["name"] = f"{self.dim['name']}.{field['name']}"
+
+            self.dimensions = parse_all_fields(
+                self.dim["fields"],
+                nested_mode=repeated_field_nested_mode,
+                primary_key=None,
+            )
 
             # add group_label key to each dimension in dimensions
-            self.group_label = pretty_label(self.name)
+            self.group_label = gen_field_label(self.name)
 
             self.nested_view = {
                 "view_name": self.name,
@@ -93,10 +113,8 @@ class Dimension:
     def clean_looker_properties(self):
         o = self.as_dict()
 
-        invalid_keys = [
-            "dim",
-            "nested_mode",
-        ]
+        # Keep field_type here so that it can be sorted later
+        invalid_keys = ["dim", "nested_mode"]
         # Remove keys where value is none
         output = {k: v for k, v in o.items() if v is not None}
 
@@ -108,10 +126,10 @@ class Dimension:
         return output
 
 
-def parse_all_fields(fields, nested_mode=False):
+def parse_all_fields(fields, primary_key, nested_mode=False):
     parsed_fields = []
     for field in fields:
-        response = Dimension(field, nested_mode)
+        response = Dimension(field, primary_key, nested_mode)
         parsed_fields.append(response)
 
     if len(parsed_fields) == 0:

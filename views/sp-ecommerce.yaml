@@ -1,0 +1,5 @@
+name: "Events"
+reference: "ct-looker-staging.sp.ecommerce_av"
+type: "view"
+primary_key: "sk"
+overrides:
