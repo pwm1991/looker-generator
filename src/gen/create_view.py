@@ -1,6 +1,6 @@
 from os import mkdir
 import lkml
-from src.gen.columns import parse_all_fields
+from src.gen.columns import parse_all_fields, clean_looker_properties
 from src.gen.looker import looker_warning
 from src.gen.text import quote_string
 
@@ -30,14 +30,8 @@ class View:
         if self.is_nested is True:
             self.parse_fields = self.schema["dimensions"]
         self.parsed_fields = [
-            dim.clean_looker_properties() for dim in dims_to_clean if dim is not None
+            clean_looker_properties(dim) for dim in dims_to_clean if dim is not None
         ]
-
-    def remove_nested_dim(self, dim_name):
-        for dim in self.parsed_fields:
-            if dim_name == dim["name"]:
-                del dim["nested_view"]
-                del dim["dimensions"]
 
     def parse_fields(self):
         self.parsed_fields = parse_all_fields(self.fields, self.schema.primary_key)
@@ -129,7 +123,6 @@ class GenerateView:
 
                 if view is not None:
                     # merge arrays
-
                     views = views + view
 
         return views
@@ -151,10 +144,15 @@ class GenerateView:
 
             nested_views = self.handle_nested_views(dim)
 
-            view.remove_nested_dim(dim["name"])
-
             if nested_views is not None:
                 views = views + nested_views
+
+        # For each dim in a view, run it through clean_looker_properties and create a new array
+        for dim in view.parsed_fields:
+            # replace dim with cleaned version
+            view.parsed_fields[view.parsed_fields.index(dim)] = clean_looker_properties(
+                dim
+            )
 
         views.append(view.to_dict())
 

@@ -17,6 +17,28 @@ def clean_looker_properties_timeframes(looker_type, data_type):
         return looker_timeframes
 
 
+def clean_looker_properties(self):
+
+    # if self has __dict__ attribute, use that
+    if hasattr(self, "__dict__"):
+        input = self.__dict__
+    else:
+        input = self
+
+    # Keep field_type here so that it can be sorted later
+    invalid_keys = ["dim", "nested_mode", "nested_view", "dimensions", "name"]
+
+    # Remove keys where value is none
+    output = {k: v for k, v in input.items() if v is not None}
+
+    # Remove keys that are not valid in Looker
+
+    # Remove keys that are in keys_to_remove
+    output = {k: v for k, v in output.items() if k not in invalid_keys}
+
+    return output
+
+
 class Dimension:
     def __init__(self, dim, primary_key, nested_mode=False):
         self.dim = dim
@@ -30,7 +52,7 @@ class Dimension:
         self.label = gen_field_label(dim["name"])
         self.group_label = self._set_group_label()
         self.column_default = self._set_column_default()
-        self.primary_key = self._guess_primary_key()
+        self.primary_key = self._set_primary_key()
 
     def _set_sql_name(self):
         if self.nested_mode == False:
@@ -55,11 +77,9 @@ class Dimension:
         if self.dim.get("COLUMN_DEFAULT") is not None:
             return self.dim["COLUMN_DEFAULT"]
 
-    def _guess_primary_key(self):
+    def _set_primary_key(self):
         # check if name is in a list of primary keys
         if self.primary_key == self.name:
-            return bool_to_string(True)
-        if self.name.lower() in ["id", "primary_key", "pk"]:
             return bool_to_string(True)
 
     def _set_time(self):
@@ -109,21 +129,6 @@ class Dimension:
         self._set_time()
         self.handle_repeated_fields()
         return self.__dict__
-
-    def clean_looker_properties(self):
-        o = self.as_dict()
-
-        # Keep field_type here so that it can be sorted later
-        invalid_keys = ["dim", "nested_mode"]
-        # Remove keys where value is none
-        output = {k: v for k, v in o.items() if v is not None}
-
-        # Remove keys that are not valid in Looker
-
-        # Remove keys that are in keys_to_remove
-        output = {k: v for k, v in output.items() if k not in invalid_keys}
-
-        return output
 
 
 def parse_all_fields(fields, primary_key, nested_mode=False):
