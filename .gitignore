@@ -1,4 +1,8 @@
+# Remove crud
+.DS_STORE
+
 # Remove keys
+
 keys/
 
 # Byte-compiled / optimized / DLL files
