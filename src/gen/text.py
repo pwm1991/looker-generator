@@ -9,19 +9,21 @@ def convert_to_snake_case(string: str) -> str:
     return string.replace(" ", "_").replace("-", "_").lower()
 
 
-def title_pk(string):
-    if string.lower() in ["pk", "id", "fk", "sk"]:
-        return string.upper()
-    return string
-
-
 # return quoted string
 def quote_string(string):
     return f'"{string}"'
 
 
-def remove_tstamp(string):
-    return string.split(" tstamp")[0]
+def clean_date(string):
+    output = string.lower()
+    if string.startswith("date"):
+        output = string[4:]
+    if string.endswith("tstamp"):
+        output = string[:-5]
+    # if name starts or ends with "time" remove "time" from the label name
+    if string.startswith("time"):
+        output = string[4:]
+    return output
 
 
 def remove_multiple_spaces(string):
@@ -29,43 +31,35 @@ def remove_multiple_spaces(string):
 
 
 def gen_field_label(name):
-    pk = ["pk", "id", "fk", "sk"]
-    output = convert_to_string_case(name)
+    primary_keys = ["pk", "id", "fk", "sk"]
 
-    output = title_pk(output)
-    if name.lower() in pk:
-        return output
+    output = convert_to_string_case(name).strip()
+
+    if name.lower() in primary_keys:
+        return output.upper()
 
     # if name starts or ends with "date" remove date
-    if output.lower().startswith("date"):
-        output = output[4:]
-    if output.lower().endswith("date"):
-        output = output[:-4]
-    # if name starts or ends with "time" remove time
-    if output.lower().startswith("time"):
-        output = output[4:]
 
     output = convert_to_string_case(output)
-    output = remove_tstamp(output)
     output = remove_multiple_spaces(output)
+    output = clean_date(output)
     output = output.replace(".", " ")
     output = output.title()
     output = output.strip()
 
     # check string ends with an identifier, and upper case it
-    for a in pk:
-
-        if output.lower().endswith(a):
-            output = output[:-2] + a.upper()
+    for str in primary_keys:
+        if output.lower().endswith(str):
+            output = output[:-2] + str.upper()
 
     return output
 
 
 def gen_view_name(string):
-    for l in ["_av", "av_"]:
-        string = string.replace(l, "")
-    for l in ["  "]:
-        string = string.replace(l, " ")
+    for l in ["av", "vw", "view"]:
+        string = string.replace("_" + l, "")
+        string = string.replace(l + "_", "")
+        string = remove_multiple_spaces(string)
     return string
 
 

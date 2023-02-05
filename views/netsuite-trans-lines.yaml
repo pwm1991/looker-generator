@@ -1,5 +1,7 @@
 name: "Netsuite Transaction Lines"
 reference: "ct-looker-staging.av_dw_netsuite.netsuite_transactions_av"
 type: "view"
-primary_key: "logging_id"
+primary_key: "transaction_id"
 overrides:
+  - convert_tz: yes
+    

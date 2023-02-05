@@ -1,8 +1,9 @@
 from os import mkdir
 import lkml
 from src.gen.columns import parse_all_fields, clean_looker_properties
-from src.gen.looker import looker_warning
+from src.gen.looker import looker_file_disclaimer
 from src.gen.text import quote_string
+import src.gen.errors as e
 
 
 class View:
@@ -55,7 +56,7 @@ class View:
                 del results[type]
 
         if results == {}:
-            raise Exception("No fields found for view")
+            raise e.ViewHasNoFieldsException
 
         return results
 
@@ -86,8 +87,9 @@ class GenerateView:
 
         print("Total views to create in file:", total_views)
 
-        return looker_warning(total_views) + (lkml.dump(lookml_input) or "")
+        return looker_file_disclaimer(total_views) + (lkml.dump(lookml_input) or "")
 
+    # TODO: replace this with the looker API.
     def save_file(self, data):
         path_to_write = f".coverage/{self.schema.filename}"
 
@@ -160,6 +162,7 @@ class GenerateView:
         if len(views) > 1:
             views = views[::-1]
             unified_view_name = views[0]["name"]
+            # Set the name of all views to the root view name so that they group together in the sidebar.
             for view in views:
                 if view["name"] != unified_view_name:
                     view["name"] = unified_view_name

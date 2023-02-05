@@ -1,12 +1,12 @@
 from src.gen.text import gen_field_label
 from src.gen.looker import (
-    bigquery_type_to_looker,
+    bigquery_type_to_looker_type,
     looker_timeframes,
     bool_to_string,
 )
 
 
-def clean_looker_properties_timeframes(looker_type, data_type):
+def clean_looker_property_timeframes(looker_type, data_type):
     if data_type in ["DATE"]:
         # remove time from timeframes
         times = looker_timeframes
@@ -21,19 +21,16 @@ def clean_looker_properties(self):
 
     # if self has __dict__ attribute, use that
     if hasattr(self, "__dict__"):
-        input = self.__dict__
-    else:
-        input = self
+        self = self.__dict__
 
     # Keep field_type here so that it can be sorted later
     invalid_keys = ["dim", "nested_mode", "nested_view", "dimensions", "name"]
 
     # Remove keys where value is none
-    output = {k: v for k, v in input.items() if v is not None}
+    output = {k: v for k, v in self.items() if v is not None}
 
-    # Remove keys that are not valid in Looker
-
-    # Remove keys that are in keys_to_remove
+    # Remove keys that are in keys_to_remove, valid in Looker.
+    # TODO: Consider making this a positive opt-in? I.e. only supported keys are allowed.
     output = {k: v for k, v in output.items() if k not in invalid_keys}
 
     return output
@@ -47,7 +44,7 @@ class Dimension:
         self.sql = self._set_sql_name()
         self.field_type = "dimension"
         self.name = dim["name"].lower()
-        self.type = bigquery_type_to_looker(dim["type"])
+        self.type = bigquery_type_to_looker_type(dim["type"])
         self.description = dim.get("description") or None
         self.label = gen_field_label(dim["name"])
         self.group_label = self._set_group_label()
@@ -84,7 +81,7 @@ class Dimension:
 
     def _set_time(self):
         self.timeframes = (
-            clean_looker_properties_timeframes(self.type, self.dim["type"]) or None
+            clean_looker_property_timeframes(self.type, self.dim["type"]) or None
         )
         if self.timeframes is not None:
             self.field_type = "dimension_group"
@@ -100,9 +97,6 @@ class Dimension:
             self.hidden = "yes"
             repeated_field_nested_mode = True
             del self.type
-
-        if self.dim.get("name") == "subscription":
-            print("Subscription time!")
 
         fields = self.dim.get("fields")
         if fields is not None:

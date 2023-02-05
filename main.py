@@ -46,13 +46,12 @@ def main():
     for file in files:
         view_metadata = load_schema(f"views/{file}")
 
-        # getting nth number from list length
         print(f"Getting schema for {view_metadata['reference']} from BigQuery")
         bigquery_get_table = client.get_table(view_metadata["reference"])
 
         bigquery_schema = BigQueryTableReference(bigquery_get_table, view_metadata)
 
-        GenerateView(bigquery_schema).to_lookml()
+        GenerateView(bigquery_schema, view_metadata).to_lookml()
     print("Done")
 
 

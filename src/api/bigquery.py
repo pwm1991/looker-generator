@@ -18,8 +18,9 @@ class BigQueryTableReference:
 
     def _create_looker_reference(self):
         string = self.id
-        for l in ["_av", "av_", "_vw", "vw_"]:
-            string = string.replace(l, "")
+        for l in ["av", "view", "vw"]:
+            string = string.replace(l + "_", "")
+            string = string.replace("_" + l, "")
         return (string + "__raw").lower()
 
     def _create_filename(self):
