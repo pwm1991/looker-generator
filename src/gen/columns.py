@@ -57,7 +57,7 @@ class Dimension:
             times.remove("time")
             times.remove("raw")
             self.looker_property["timeframes"] = times
-        if self.looker_property["type"] == "time":
+        elif self.input_schema["type"] in ["TIMESTAMP", "DATETIME", "EPOCH"]:
             self.looker_property["timeframes"] = looker_timeframes
 
         if self.looker_property["timeframes"] is not None:
