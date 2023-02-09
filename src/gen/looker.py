@@ -18,6 +18,7 @@ valid_looker_field_types = [
     "hidden",
     "field_type",
     "input_schema",
+    "nested_properties",
 ]
 
 

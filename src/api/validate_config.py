@@ -12,7 +12,7 @@ class PrimaryKeyDeclaredButPointlessException(Exception):
         )
 
 
-def validate_view_references(references: list):
+def validate_view_references(references: dict):
     # ensure no duplicate objects in array
     reference_names = []
     for ref in references:

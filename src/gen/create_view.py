@@ -39,7 +39,6 @@ class View:
         results = {}
         for type in supported_types:
             results[type] = []
-            print("Processing fields of type", type)
             for field in self.parsed_fields:
                 if field.get("field_type") == type:
                     field = filter_invalid_looker_properties(field)

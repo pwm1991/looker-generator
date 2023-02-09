@@ -2,6 +2,7 @@ import os
 import yaml
 from dotenv import dotenv_values
 from src.api.bigquery import BigQueryTableReference
+from src.api.validate_config import validate_view_references
 from src.gen.create_view import GenerateView
 from google.cloud import bigquery
 
@@ -41,8 +42,12 @@ def main():
     client = bigquery.Client(project="ct-looker-staging")
     files = get_files()
     for file in files:
-        properties = load_schema(f"views/{file}")
-        for view in properties["views"]:
+        views = load_schema(f"views/{file}")["views"]
+
+        validation = validate_view_references(views)
+
+        for view in views:
+
             if view.get("disabled") == True:
                 print(f"Skipping {view['reference']}: marked as disabled")
                 continue
