@@ -50,6 +50,9 @@ def beautify_abbreviation(string):
         "Weu",
         "Meu",
         "Rweu",
+        "idfa",
+        "idfv",
+        "os",
     ]
 
     test_string = string.lower()
