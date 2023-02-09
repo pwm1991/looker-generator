@@ -2,10 +2,10 @@ import src.gen.text as text
 
 # create unittest for gen_field_label
 def test_gen_field_label():
-    assert text.gen_field_label("test-test_test") == "Test Test Test"
-    assert text.gen_field_label("test_pk") == "Test PK"
-    assert text.gen_field_label("test_id") == "Test ID"
-    assert text.gen_field_label("test_tstamp") == "Test"
+    assert text.set_field_label("test-test_test") == "Test Test Test"
+    assert text.set_field_label("test_pk") == "Test PK"
+    assert text.set_field_label("test_id") == "Test ID"
+    assert text.set_field_label("test_tstamp") == "Test"
 
 
 # create unittest for convert_to_string_case

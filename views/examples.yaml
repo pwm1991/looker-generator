@@ -1,0 +1,8 @@
+---
+views:
+    - name: "Netsuite Transaction Lines"
+      reference: "ct-looker-staging.av_dw_netsuite.netsuite_transactions_av"
+      primary_key: "transaction_id"
+    - name: "Netsuite Transaction Lines"
+      reference: "ct-looker-staging.av_dw_netsuite.netsuite_transactions_av"
+      primary_key: "transaction_id"

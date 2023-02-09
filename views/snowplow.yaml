@@ -1,0 +1,27 @@
+---
+views:
+    - name: "Events"
+      reference: "ct-looker-staging.sp.ecommerce_av"
+      primary_key: "sk"
+      disabled: true
+    - name: "App Active Users (Aggregated)"
+      reference: "ct-looker-staging.sp.app_active_users_agg_av"
+      primary_key: "day"
+    - name: "App Installs"
+      reference: "ct-looker-staging.sp.app_installs_retention_av"
+    - name: "Marketing Form Signups"
+      reference: "ct-looker-staging.sp.mkt_signup_av"
+      primary_key: "sk"
+    - name: "Marketing Form Signups (Aggregated)"
+      reference: "ct-looker-staging.sp.mkt_signup_agg_av"
+      primary_key: "sk"
+    - name: "App Screenviews"
+      reference: "ct-looker-staging.sp.app_screenviews_av"
+      primary_key: "sv_sk"
+    - name: "App Sessions"
+      reference: "ct-looker-staging.sp.app_sessions_av"
+      primary_key: "session_id"
+    - name: "App Users"
+      reference: "ct-looker-staging.sp.app_users_av"
+      primary_key: "network_userid"
+      

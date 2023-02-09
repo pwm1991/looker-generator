@@ -4,6 +4,22 @@ from src.gen.errors import LookerColumnTypeNotFound
 
 looker_timeframes = ["raw", "time", "date", "week", "month", "quarter", "year"]
 
+valid_looker_field_types = [
+    "name",
+    "sql",
+    "primary_key",
+    "type",
+    "description",
+    "label",
+    "group_label",
+    "timeframes",
+    "convert_tz",
+    "nested_mode",
+    "hidden",
+    "field_type",
+    "input_schema",
+]
+
 
 def looker_file_disclaimer(objects_in_file):
 
@@ -29,12 +45,7 @@ def looker_file_disclaimer(objects_in_file):
 
 
 def bool_to_string(bool):
-    # if type is not a boolean, raise error
-    if type(bool) != bool:
-        raise TypeError(
-            f"Type {type(bool)} is not a boolean, Looker cannot parse this."
-        )
-    if bool:
+    if bool == True:
         return "yes"
     else:
         return "no"
@@ -60,3 +71,27 @@ def bigquery_type_to_looker_type(bigquery_type):
     if bigquery_type not in types:
         raise LookerColumnTypeNotFound(bigquery_type)
     return types[bigquery_type]
+
+
+def filter_invalid_looker_properties(obj):
+
+    # Keep field_type here so that it can be sorted later
+    invalid_keys = [
+        "input_schema",
+        "nested_mode",
+        "nested_view",
+        "dimensions",
+        "nested_properties",
+        "field_type",
+    ]
+
+    output = {k: v for k, v in obj.items() if k not in invalid_keys}
+
+    # Soft warn that some keys are not valid
+    for k in obj.items():
+        if k[0] not in valid_looker_field_types:
+            print(
+                f"WARNING: {k[0]} might not be a valid Looker field type. If you see this error persistently, update valid_looker_field_types"
+            )
+
+    return output

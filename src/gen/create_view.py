@@ -1,7 +1,7 @@
 from os import mkdir
 import lkml
-from src.gen.columns import parse_all_fields, clean_looker_properties
-from src.gen.looker import looker_file_disclaimer
+from src.gen.columns import parse_all_fields
+from src.gen.looker import looker_file_disclaimer, filter_invalid_looker_properties
 from src.gen.text import quote_string
 import src.gen.errors as e
 
@@ -21,21 +21,12 @@ class View:
             self.full_table_id = self.schema.full_table_id
             self.filename = self.schema.filename
             self.view_name = self.schema.parent_looker_reference
-            self.fields = self.schema.fields
-        else:
-            self.view_name = self.schema["view_name"]
-            self.parsed_fields = list(self.schema["dimensions"])
-
-    def clean_dimensions(self):
-        dims_to_clean = self.parsed_fields
-        if self.is_nested is True:
-            self.parse_fields = self.schema["dimensions"]
-        self.parsed_fields = [
-            clean_looker_properties(dim) for dim in dims_to_clean if dim is not None
-        ]
+            self.schema_fields = self.schema.fields
 
     def parse_fields(self):
-        self.parsed_fields = parse_all_fields(self.fields, self.schema.primary_key)
+        self.parsed_fields = parse_all_fields(
+            self.schema_fields, self.schema.primary_key
+        )
 
     def get_parent_view_name(self):
         return self.table_id
@@ -48,9 +39,10 @@ class View:
         results = {}
         for type in supported_types:
             results[type] = []
+            print("Processing fields of type", type)
             for field in self.parsed_fields:
                 if field.get("field_type") == type:
-                    del field["field_type"]
+                    field = filter_invalid_looker_properties(field)
                     results[type].append(field)
             if len(results[type]) == 0:
                 del results[type]
@@ -63,16 +55,39 @@ class View:
     def to_dict(self):
         view = dict()
         fields = self._translate_fields_to_types()
+
         if self.is_nested is False:
             view.update(
                 {
                     "name": self.schema.parent_looker_reference,
                     "sql_table_name": quote_string(self.full_table_id),
-                    "view_name": self.schema.pretty_name,
+                    "label": self.schema.pretty_name,
                 }
             )
-        else:
-            view.update({"name": f"{self.parent}__{self.view_name}__raw"})
+        view.update(fields)
+        return view
+
+
+class RepeatedView(View):
+    def __init__(self, schema, parent):
+        self.schema = schema
+        self.parent = parent
+        self.view_name = parent.parent_looker_reference + "__" + schema["name"]
+        self.parsed_fields = schema["nested_properties"]["dimensions"]
+        self.label = parent.pretty_name
+
+    def to_dict(self):
+
+        view = dict()
+
+        fields = self._translate_fields_to_types()
+
+        view.update(
+            {
+                "name": self.view_name,
+                "label": self.label,
+            }
+        )
         view.update(fields)
         return view
 
@@ -87,7 +102,9 @@ class GenerateView:
 
         print("Total views to create in file:", total_views)
 
-        return looker_file_disclaimer(total_views) + (lkml.dump(lookml_input) or "")
+        lkml_output = lkml.dump(lookml_input) or ""
+
+        return looker_file_disclaimer(total_views) + lkml_output
 
     # TODO: replace this with the looker API.
     def save_file(self, data):
@@ -104,28 +121,26 @@ class GenerateView:
             f.write(data)
             print(f"Wrote LookML to file: ", path_to_write)
 
-    def handle_nested_views(self, dim):
+    def handle_nested_views(self, nested_view):
         views = []
 
-        if dim.get("nested_view") is None:
-            return
-        view = View(dim["nested_view"], is_nested_view=True, parent=self)
-        view.clean_dimensions()
+        # if nesed view nested properties dimensions is None, raise exception
+        if nested_view["nested_properties"]["dimensions"] is None:
+            raise e.NestedViewHasNoDimensionsException
 
-        print("Processing view", dim["name"])
+        view = RepeatedView(nested_view, parent=self.schema).to_dict()
 
-        views.append(view.to_dict())
+        views.append(view)
+        if view.get("parsed_fields") is not None:
+            for nested_view in view["parsed_fields"]:
+                if nested_view.get("nested_view") is not None:
+                    view = self.handle_nested_views(nested_view)
 
-        for dim in view.parsed_fields:
-            if dim.get("nested_view") is not None:
-                view = self.handle_nested_views(dim)
+                    del nested_view["nested_properties"]
 
-                del dim["nested_view"]
-                del dim["dimensions"]
-
-                if view is not None:
-                    # merge arrays
-                    views = views + view
+                    if view is not None:
+                        # merge arrays
+                        views = views + view
 
         return views
 
@@ -136,36 +151,31 @@ class GenerateView:
         view = View(self.schema)
 
         view.parse_fields()
-        view.clean_dimensions()
 
         # filter only nested_views
-        fields_with_nested_views = [
-            dim for dim in view.parsed_fields if dim.get("nested_view") is not None
-        ]
+        fields_with_nested_views = []
+        for dim in view.parsed_fields:
+            if dim.get("nested_properties") is not None:
+                fields_with_nested_views.append(dim)
+
         for dim in fields_with_nested_views:
+
+            print("Processing nested view", dim["name"])
 
             nested_views = self.handle_nested_views(dim)
 
             if nested_views is not None:
                 views = views + nested_views
 
-        # For each dim in a view, run it through clean_looker_properties and create a new array
-        for dim in view.parsed_fields:
-            # replace dim with cleaned version
-            view.parsed_fields[view.parsed_fields.index(dim)] = clean_looker_properties(
-                dim
-            )
-
         views.append(view.to_dict())
 
         # Reverse so root view is at the top
         if len(views) > 1:
             views = views[::-1]
-            unified_view_name = views[0]["name"]
+            unified_view_name = views[0]["label"]
             # Set the name of all views to the root view name so that they group together in the sidebar.
             for view in views:
-                if view["name"] != unified_view_name:
-                    view["name"] = unified_view_name
+                view["label"] = unified_view_name
 
         lookml_to_generate = {"views": views}
 

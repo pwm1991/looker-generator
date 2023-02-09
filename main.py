@@ -20,9 +20,6 @@ def load_schema(file):
     return dict(schema)
 
 
-# loop through yaml files in views folder
-
-
 def get_files():
     directory = os.listdir("views")
 
@@ -44,15 +41,20 @@ def main():
     client = bigquery.Client(project="ct-looker-staging")
     files = get_files()
     for file in files:
-        view_metadata = load_schema(f"views/{file}")
+        properties = load_schema(f"views/{file}")
+        for view in properties["views"]:
+            if view.get("disabled") == True:
+                print(f"Skipping {view['reference']}: marked as disabled")
+                continue
 
-        print(f"Getting schema for {view_metadata['reference']} from BigQuery")
-        bigquery_get_table = client.get_table(view_metadata["reference"])
+            print(f"Getting schema for {view['reference']} from BigQuery")
 
-        bigquery_schema = BigQueryTableReference(bigquery_get_table, view_metadata)
+            bigquery_get_table = client.get_table(view["reference"])
 
-        GenerateView(bigquery_schema, view_metadata).to_lookml()
-    print("Done")
+            bigquery_schema = BigQueryTableReference(bigquery_get_table, view)
+
+            GenerateView(bigquery_schema).to_lookml()
+            print("Done")
 
 
 main()

@@ -16,27 +16,66 @@ def quote_string(string):
 
 def clean_date(string):
     output = string.lower()
-    if string.startswith("date"):
+    if string.startswith("date") and string.lower() != "dates":
         output = string[4:]
     if string.endswith("tstamp"):
-        output = string[:-5]
+        output = string[:-6]
     # if name starts or ends with "time" remove "time" from the label name
     if string.startswith("time"):
         output = string[4:]
-    return output
+    return remove_multiple_spaces(output)
 
 
 def remove_multiple_spaces(string):
     return " ".join(string.split())
 
 
-def gen_field_label(name):
-    primary_keys = ["pk", "id", "fk", "sk"]
+def beautify_abbreviation(string):
+    output = string
+
+    abbreviations = [
+        "pk",
+        "id",
+        "fk",
+        "sk",
+        "guid",
+        "utc",
+        "gmt",
+        "gbp",
+        "usd",
+        "dau",
+        "wau",
+        "mau",
+        "Deu",
+        "Weu",
+        "Meu",
+        "Rweu",
+    ]
+
+    test_string = string.lower()
+
+    if test_string in abbreviations:
+        return output.upper()
+
+    for abbr in abbreviations:
+        mid_string_test = " " + abbr + " "
+        mid_string_test_as_title = mid_string_test.title()
+        abbr_len = len(abbr)
+
+        if test_string.endswith(abbr):
+            output = output[:-abbr_len] + abbr.upper()
+
+        if mid_string_test in test_string:
+            output = output.replace(mid_string_test_as_title, mid_string_test.upper())
+
+    return output
+
+
+def set_field_label(name):
 
     output = convert_to_string_case(name).strip()
 
-    if name.lower() in primary_keys:
-        return output.upper()
+    # if name contains " id " then race " id " to " ID
 
     # if name starts or ends with "date" remove date
 
@@ -46,11 +85,7 @@ def gen_field_label(name):
     output = output.replace(".", " ")
     output = output.title()
     output = output.strip()
-
-    # check string ends with an identifier, and upper case it
-    for str in primary_keys:
-        if output.lower().endswith(str):
-            output = output[:-2] + str.upper()
+    output = beautify_abbreviation(output)
 
     return output
 
