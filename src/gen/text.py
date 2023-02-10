@@ -8,10 +8,8 @@ def convert_to_string_case(string):
 def convert_to_snake_case(string: str) -> str:
     return string.replace(" ", "_").replace("-", "_").lower()
 
-
-# return quoted string
-def quote_string(string):
-    return f'"{string}"'
+def backtick_string(string):
+    return f"`{string}`"
 
 
 def clean_date(string):

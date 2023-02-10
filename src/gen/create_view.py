@@ -2,7 +2,7 @@ from os import mkdir
 import lkml
 from src.gen.columns import parse_all_fields
 from src.gen.looker import looker_file_disclaimer, filter_invalid_looker_properties
-from src.gen.text import quote_string
+from src.gen.text import backtick_string
 import src.gen.errors as e
 
 
@@ -59,7 +59,7 @@ class View:
             view.update(
                 {
                     "name": self.schema.parent_looker_reference,
-                    "sql_table_name": quote_string(self.full_table_id),
+                    "sql_table_name": backtick_string(self.full_table_id),
                     "label": self.schema.pretty_name,
                 }
             )
