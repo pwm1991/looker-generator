@@ -25,26 +25,36 @@ class Dimension:
             "timeframes": None,
             "field_type": "dimension",
         }
+
+        if self.looker_property["name"] == "app__version":
+            print("build column!")
+
         self._set_primary_key()
-        self._set_group_label()
         self._set_time()
+        self._set_group_label()
 
         if self.input_schema["type"] in ["RECORD"]:
             self._handle_repeated_fields()
 
     def _set_sql_reference(self):
         if self.nested_mode == False:
-            return f"${{TABLE}}.{self.input_schema['name']}"
+            if self.input_schema.get("sql"):
+                return f"${{TABLE}}.{self.input_schema['sql']}"
+            else:
+                return f"${{TABLE}}.{self.input_schema['name']}"
         else:
             return self.input_schema["name"].replace("__", ".")
 
     def _set_group_label(self):
         diagnostic_fields = ["event_id", "run_id"]
         if self.nested_metadata is not None:
-            return self.nested_metadata["group_label"]
+            self.looker_property["group_label"] = self.nested_metadata["group_label"]
+
+        if self.input_schema["type"] in ["RECORD"]:
+            self.looker_property["group_label"] = self.looker_property["label"]
 
         if self.looker_property["name"] in diagnostic_fields:
-            return "Diagnostic Fields"
+            self.looker_property["group_label"] = "Diagnostic Fields"
 
     def _set_primary_key(self):
         if self.input_primary_key == self.looker_property["name"]:
@@ -82,10 +92,11 @@ class Dimension:
             if is_repeated_field == False:
                 # For nested, non-repeating fields, prepend the parent input_schema.name
                 for field in fields:
+                    field["sql"] = f"{self.input_schema['name']}.{field['name']}"
                     field["name"] = f"{self.input_schema['name']}__{field['name']}"
 
             nested_metadata = {
-                "group_label": self.looker_property["label"],
+                "group_label": self.looker_property["group_label"],
             }
 
             self.nested_dimensions = parse_all_fields(

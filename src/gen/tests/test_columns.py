@@ -115,3 +115,49 @@ def test_repeated_view_parent():
             ],
         },
     }
+
+
+def test_record_non_repeated():
+    nested_mode = False
+    input_schema = {
+        "name": "app",
+        "type": "RECORD",
+        "fields": [
+            {"name": "app__name", "type": "STRING", "sql": "app.name"},
+            {"name": "app__version", "type": "STRING", "sql": "app.version"},
+            {"name": "app__build", "type": "STRING", "sql": "app.build"},
+        ],
+    }
+
+    dimension = Dimension(input_schema, None, nested_mode).as_dict()
+
+    assert dimension == {
+        "is_own_view": False,
+        "view_name": "app",
+        "dimensions": [
+            {
+                "name": "app__name",
+                "sql": "${TABLE}.app.name",
+                "label": "App Name",
+                "group_label": "App",
+                "type": "string",
+                "field_type": "dimension",
+            },
+            {
+                "name": "app__version",
+                "sql": "${TABLE}.app.version",
+                "label": "App Version",
+                "group_label": "App",
+                "type": "string",
+                "field_type": "dimension",
+            },
+            {
+                "name": "app__build",
+                "sql": "${TABLE}.app.build",
+                "label": "App Build",
+                "group_label": "App",
+                "type": "string",
+                "field_type": "dimension",
+            },
+        ],
+    }
