@@ -40,6 +40,4 @@ It does a few things with a view:
 
 Tests are written using pytest. To run the tests, run the following command:
 
-```coverage run -m pytest```
-
-Get coverage: ```coverage report```
+```make test```
