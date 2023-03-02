@@ -35,7 +35,6 @@ It does a few things with a view:
 5. Light-touch labelling of potentially diagnostic or Snowplow-identifiable fields
 6. Remove `time` from date-based dimension groups
 
-
 ## Testing
 
 Tests are written using pytest. To run the tests, run the following command:
