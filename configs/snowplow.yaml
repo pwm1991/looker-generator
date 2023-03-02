@@ -3,6 +3,8 @@ views:
     - name: "Events"
       reference: "ct-looker-staging.sp.ecommerce_av"
       primary_key: "sk"
+      create_metrics: false
+      seasoning: "sp"
     - name: "App Active Users (Aggregated)"
       reference: "ct-looker-staging.sp_agg.app_active_users_agg_av"
       primary_key: "day"

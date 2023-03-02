@@ -1,0 +1,5 @@
+views:
+  - name: "RSD Something or other"
+    reference: "ct-looker-staging.rsd_dw_av.sales_retail_out_financial_budget_forecast_av"
+    create_metrics: false
+    seasoning: "rsd"

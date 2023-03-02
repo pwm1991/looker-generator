@@ -1,7 +1,6 @@
 import os
 import yaml
 from src.api.bigquery import BigQueryTableReference
-from src.api.validate_config import validate_view_references
 from src.gen.create_view import GenerateView
 from src.config_validation.validate import validate_configs
 from google.cloud import bigquery

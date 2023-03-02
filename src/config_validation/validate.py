@@ -16,6 +16,8 @@ def config_has_unsupported_props(properties):
         "description",
         "reference",
         "primary_key",
+        "create_metrics",
+        "seasoning",
     ]
     invalid_properties = [
         property for property in properties if property not in supported_properties
