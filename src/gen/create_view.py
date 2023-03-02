@@ -1,9 +1,16 @@
 from os import mkdir
+import os
 import lkml
 from src.gen.columns import parse_all_fields
 from src.gen.looker import looker_file_disclaimer, filter_invalid_looker_properties
 from src.gen.text import backtick_string
 import src.gen.errors as e
+
+from dotenv import load_dotenv
+
+load_dotenv()
+
+OUTPUT_DIRECTORY = os.getenv("OUTPUT_DIRECTORY")
 
 
 class View:
@@ -107,11 +114,11 @@ class GenerateView:
 
     # TODO: replace this with the looker API.
     def save_file(self, data):
-        path_to_write = f".coverage/{self.schema.filename}"
+        path_to_write = f"./{OUTPUT_DIRECTORY}/{self.schema.filename}"
 
-        # create directory ./coverage if it doesn't exist
+        # create directory ./{OUTPUT_DIRECTORY} if it doesn't exist
         try:
-            mkdir(".coverage")
+            mkdir(f"./{OUTPUT_DIRECTORY}")
         except FileExistsError:
             pass
 

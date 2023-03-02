@@ -64,6 +64,7 @@ def test_non_repeated_string():
         "primary_key": "yes",
         "type": "string",
         "field_type": "dimension",
+        "group_label": "Diagnostic Fields",
     }
 
 

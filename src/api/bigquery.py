@@ -1,11 +1,6 @@
 from src.gen.text import convert_to_snake_case
 
 
-def validate_table_reference(reference):
-    if len(reference.split(".")) != 3:
-        return False
-
-
 class BigQueryTableReference:
     def __init__(self, table_reference, view_metadata):
         self.table_reference_metadata = table_reference
