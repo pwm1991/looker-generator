@@ -1,28 +1,28 @@
 # Looker Generator
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
 Looker Generator is a tool to generate LookML from BigQuery database schema.
 
 ## Installation
 
-### Prerequisites
-
-[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
-
-
 - Python 3.9 or later
-- `pip install -r requirements.txt`
+- `make setup`
 
-### Authenticating
+### Authenticating with gcloud
 
-This currently uses gcloud to authenticate. You can do this by running `gcloud auth application-default login` and following the instructions.
+`make auth`
 
-You don't need a service key
+You don't need a service key, but your personal account needs to be able to do fancy stuff in the project you want to generate views from.
+### Update your env file
+
+Create a `.env` file and fill in the relevant details. Use `.env.example` as a template.
 
 ### Creating a view
 
 1. Create a view in BigQuery in `ct-looker-*
-2. Create a file in `looker_generator/views` with the same name as the view and fill out the relevant details
-3. Run the application by pressing F5 in VSCode or running `python -m looker_generator` or going to `launch.json` and running the `Looker Generator` configuration
+2. Create a file in `/configs` with the same name as the view and fill out the relevant details
+3. `make run`
+
 
 ## What this does
 
@@ -41,3 +41,5 @@ It does a few things with a view:
 Tests are written using pytest. To run the tests, run the following command:
 
 ```make test```
+
+A coverage report will be generated in the `coverage` directory.

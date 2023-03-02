@@ -7,6 +7,9 @@ run:
 test:
 	coverage run -m pytest
 
+auth:
+	gcloud auth application-default login
+
 clean:
 	rm -rf __pycache__ .pytest_cache .coverage
 
