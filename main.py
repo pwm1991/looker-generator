@@ -3,10 +3,15 @@ import yaml
 from src.api.bigquery import BigQueryTableReference
 from src.api.validate_config import validate_view_references
 from src.gen.create_view import GenerateView
+from src.config_validation.validate import validate_configs
 from google.cloud import bigquery
 
+from dotenv import load_dotenv
 
-env_project = "ct-looker-staging"
+load_dotenv()
+
+BIGQUERY_PROJECT = os.getenv("BIGQUERY_PROJECT")
+CONFIG_DIRECTORY = (os.getenv("CONFIG_DIRECTORY") or "").replace("/", "")
 
 
 def load_schema(file: str):
@@ -15,16 +20,20 @@ def load_schema(file: str):
         try:
             schema = yaml.load(f, Loader=yaml.FullLoader)
             print(f"Loaded schema from {file}")
-            return dict(schema["views"])
+            return schema["views"]
         except yaml.YAMLError as exc:
             print(exc)
 
 
 def get_files():
-    directory = os.listdir("views")
+    directory = os.listdir(f"{CONFIG_DIRECTORY}")
 
     print("Processing files")
-    files = [file for file in directory if file.endswith(".yaml")]
+    files = [
+        file
+        for file in directory
+        if file.endswith(".yaml") and not file.startswith("example")
+    ]
 
     if len(files) == 0:
         print("No files found")
@@ -39,32 +48,21 @@ def get_views():
     views = []
 
     for file in files:
-        load_schemas = load_schema(f"views/{file}")
+        load_schemas = load_schema(f"{CONFIG_DIRECTORY}/{file}")
         if load_schemas is None:
             raise Exception(f"Error loading schemas from {file}")
 
-        views_to_process = load_schemas
-
-        validation = validate_view_references(views_to_process)
-
-        disabled_views = [
-            view for view in views_to_process if view.get("disabled") == True
-        ]
-        if len(disabled_views) > 0:
-            print(f"Found {len(disabled_views)} disabled views")
-            print(", ".join([view["reference"] for view in disabled_views]))
+        views_to_process = validate_configs(BIGQUERY_PROJECT, load_schemas, "SKIP")
 
         for view in views_to_process:
-            if view in disabled_views:
-                continue
             print(f"Processing {view['reference']}")
             views.append(view)
 
     return views
 
 
-def main():
-    client = bigquery.Client(project=env_project)
+def build_views():
+    client = bigquery.Client(project=BIGQUERY_PROJECT)
 
     views_to_process = get_views()
 
@@ -77,3 +75,6 @@ def main():
         bigquery_schema = BigQueryTableReference(bigquery_get_table, view)
 
         GenerateView(bigquery_schema).to_lookml()
+
+
+build_views()

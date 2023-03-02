@@ -11,3 +11,4 @@ clean:
 	rm -rf __pycache__
 
 pip_upgrade:
+	sudo pip3 install pip --upgrade
