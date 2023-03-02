@@ -10,7 +10,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-OUTPUT_DIRECTORY = os.getenv("OUTPUT_DIRECTORY")
+OUTPUT_DIRECTORY = (os.getenv("OUTPUT_DIRECTORY") or "").replace("/", "")
 
 
 class View:
