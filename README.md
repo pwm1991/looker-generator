@@ -16,8 +16,7 @@ Looker Generator is a tool to generate LookML from BigQuery database schema.
 
 `make auth`
 
-You don't need a service key, but your personal account needs `Service Usage Consumer` access in the project.
-
+You don't need a service key, but your personal account might need a specific permission to access the project.
 
 ### Update your env file
 
