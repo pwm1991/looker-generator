@@ -1,6 +1,11 @@
 [run]
 branch = True
 data_file = ./.coverage/.coverage
+omit = 
+    */venv/*
+    */site-packages/*
+    */tests/*
+    */test_*
 
 [html]
 directory = ./.coverage/html_report/

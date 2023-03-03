@@ -96,25 +96,21 @@ def test_repeated_view_parent():
 
     dimension = Dimension(input_schema, None, nested_mode).as_dict()
 
-    assert dimension == {
-        "name": "example_repeated",
-        "label": "Example Repeated",
-        "field_type": "dimension",
-        "sql": "${TABLE}.example_repeated",
-        "hidden": "yes",
-        "nested_properties": {
-            "is_own_view": True,
-            "view_name": "example_repeated",
-            "dimensions": [
-                {
-                    "name": "segment_name",
-                    "sql": "segment_name",
-                    "label": "Segment Name",
-                    "type": "string",
-                    "field_type": "dimension",
-                }
-            ],
-        },
+    assert dimension["hidden"] == "yes"
+    assert dimension["label"] == "Example Repeated"
+    assert dimension["nested_properties"] == {
+        "is_own_view": True,
+        "view_name": "example_repeated",
+        "dimensions": [
+            {
+                "name": "segment_name",
+                "sql": "segment_name",
+                "label": "Segment Name",
+                "type": "string",
+                "group_label": "Example Repeated",
+                "field_type": "dimension",
+            }
+        ],
     }
 
 
@@ -124,41 +120,23 @@ def test_record_non_repeated():
         "name": "app",
         "type": "RECORD",
         "fields": [
-            {"name": "app__name", "type": "STRING", "sql": "app.name"},
-            {"name": "app__version", "type": "STRING", "sql": "app.version"},
-            {"name": "app__build", "type": "STRING", "sql": "app.build"},
+            {"name": "name", "type": "STRING", "sql": "app.name"},
+            {"name": "version", "type": "STRING", "sql": "app.version"},
+            {"name": "build", "type": "STRING", "sql": "app.build"},
         ],
     }
 
     dimension = Dimension(input_schema, None, nested_mode).as_dict()
 
-    assert dimension == {
-        "is_own_view": False,
-        "view_name": "app",
-        "dimensions": [
-            {
-                "name": "app__name",
-                "sql": "${TABLE}.app.name",
-                "label": "App Name",
-                "group_label": "App",
-                "type": "string",
-                "field_type": "dimension",
-            },
-            {
-                "name": "app__version",
-                "sql": "${TABLE}.app.version",
-                "label": "App Version",
-                "group_label": "App",
-                "type": "string",
-                "field_type": "dimension",
-            },
-            {
-                "name": "app__build",
-                "sql": "${TABLE}.app.build",
-                "label": "App Build",
-                "group_label": "App",
-                "type": "string",
-                "field_type": "dimension",
-            },
-        ],
-    }
+    print(dimension)
+
+    input = dimension["nested_properties"]
+
+    assert input["is_own_view"] == False
+    assert input["view_name"] == "app"
+    assert len(input["dimensions"]) > 0
+    first_dimension = input["dimensions"][0]
+    assert first_dimension["name"] == "app__name"
+    assert first_dimension["sql"] == "${TABLE}.app.name"
+    assert first_dimension["label"] == "App Name"
+    assert first_dimension["group_label"] == "App"

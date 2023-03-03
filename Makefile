@@ -7,6 +7,12 @@ run:
 test:
 	coverage run -m pytest
 
+test_verbose:
+	coverage run -m pytest -vv
+
+test_report:
+	make test; coverage html
+
 auth:
 	gcloud auth application-default login
 
