@@ -2,7 +2,7 @@ setup:
 	pip install -r requirements.txt
 
 freeze:
-	pip freeze > requirements.txt
+	pipreqs --force
 
 run:
 	python3 main.py

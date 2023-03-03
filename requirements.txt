@@ -4,3 +4,6 @@ black
 bigquery
 coverage
 google-cloud-bigquery
+protobuf==4.22.0
+python-dotenv==1.0.0
+PyYAML==6.0
